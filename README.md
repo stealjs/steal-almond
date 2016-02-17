@@ -37,7 +37,7 @@ var multiBuild = stealTools.createMultiBuildStream;
 var concat = stealTools.createConcatStream;
 var write = stealTools.createWriteStream;
 
-var almond = require("../main").createAlmondStream;
+var almond = require("steal-almond").createAlmondStream;
 
 var stream = createGraphStream({
 	config: __dirname + "/tests/basics/package.json!npm"
