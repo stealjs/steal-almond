@@ -14,17 +14,10 @@ function addAlmond(data, enc, next){
 	var configMain = data.steal.System.configMain;
 	var main = data.steal.System.main;
 
+	var toKeep = walk(data.graph, main);
+
 	bundles.forEach(function(bundle){
-		var toKeep = {};
-		merge(toKeep, bundle.bundles);
-
 		// Should find a more efficient way
-
-		bundle.nodes.forEach(function(node){
-			if(toKeep[node.load.name]) {
-				merge(toKeep, node.load.metadata.dependencies);
-			}
-		});
 
 		var toRemove = [];
 		bundle.nodes.forEach(function(node, i){
@@ -53,13 +46,30 @@ function addAlmond(data, enc, next){
 	});
 }
 
+function walk(graph, name, keep, visited){
+	keep = keep || {};
+	visited = visited || {};
+	keep[name] = true;
+	visited[name] = true;
+
+	var node = graph[name];
+	var deps = node.load.metadata.dependencies || [];
+
+	deps.forEach(function(name){
+		if(!visited[name])
+			walk(graph, name, keep, visited);
+	});
+
+	return keep;
+}
+
 function merge(obj, arr){
 	arr.forEach(function(key){
 		obj[key] = true;
 	});
 }
 
-exports.createBuild = function(stealTools){
+function createBuild(stealTools){
 	var createGraphStream = stealTools.createGraphStream;
 	var multiBuild = stealTools.createMultiBuildStream;
 	var concat = stealTools.createConcatStream;
@@ -68,6 +78,9 @@ exports.createBuild = function(stealTools){
 
 	return function(system, options){
 		return new Promise(function(resolve, reject){
+			options = options || {};
+			options.useNormalizedDependencies = true;
+
 			var stream = createGraphStream(system, options)
 			.pipe(multiBuild())
 			.pipe(almond())
@@ -85,4 +98,4 @@ exports.createBuild = function(stealTools){
 
 		});
 	};
-};
+}

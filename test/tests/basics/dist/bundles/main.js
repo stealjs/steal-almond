@@ -433,16 +433,24 @@ var requirejs, require, define;
     };
 }());
 
+/*dep@1.0.0#main*/
+define('dep@1.0.0#main', function (require, exports, module) {
+    module.exports = function () {
+        return 'dep';
+    };
+});
 /*other*/
 define('other', function (require, exports, module) {
+    var dep = require('dep@1.0.0#main');
     module.exports = function () {
-        return 'bar';
+        return 'i am other and i have ' + dep();
     };
 });
 /*main*/
 define('main', function (require, exports, module) {
     'format cjs';
-    var other = require('./other');
+    var other = require('other');
+    window.moduleValue = other;
     var child = document.createElement('div');
     child.textContent = 'hello world';
     document.body.appendChild(child);

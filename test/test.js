@@ -17,7 +17,11 @@ describe("createAlmondStream", function(){
 	it("Works", function(done){
 		var stream = createGraphStream({
 			config: __dirname + "/tests/basics/package.json!npm"
-		}, { minify: false, quiet: true })
+		}, {
+			minify: false,
+			quiet: true,
+			useNormalizedDependencies: true
+		})
 		.pipe(multiBuild())
 		.pipe(almond())
 		.pipe(concat())
@@ -25,11 +29,10 @@ describe("createAlmondStream", function(){
 
 
 		stream.pipe(through.obj(function(){
-			console.log("it's done");
-
 			open("test/tests/basics/prod.html", function(browser, close){
 				find(browser,"moduleValue", function(moduleValue){
-					assert.equal(moduleValue, "works", "it worked");
+					var msg = moduleValue();
+					assert.equal(msg, "i am other and i have dep", "it worked");
 					close();
 				}, close);
 			}, done);
