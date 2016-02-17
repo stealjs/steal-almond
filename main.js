@@ -3,6 +3,8 @@ var almondPath = require.resolve("almond");
 var makeNode = require("steal-tools/lib/node/make_node");
 var fs = require("fs");
 
+exports = module.exports = createBuild;
+
 exports.createAlmondStream = function(){
 	return through.obj(addAlmond);
 };
@@ -58,8 +60,29 @@ function merge(obj, arr){
 }
 
 exports.createBuild = function(stealTools){
+	var createGraphStream = stealTools.createGraphStream;
+	var multiBuild = stealTools.createMultiBuildStream;
+	var concat = stealTools.createConcatStream;
+	var write = stealTools.createWriteStream;
+	var almond = exports.createAlmondStream;
 
 	return function(system, options){
+		return new Promise(function(resolve, reject){
+			var stream = createGraphStream(system, options)
+			.pipe(multiBuild())
+			.pipe(almond())
+			.pipe(concat())
+			.pipe(write());
 
+			stream.on("data", function(data){
+				this.end();
+				resolve(data);
+			});
+
+			stream.on("error", function(err){
+				reject(err);
+			});
+
+		});
 	};
 };
