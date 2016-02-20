@@ -27,9 +27,9 @@
   },
   "engineDependencies": {
     "node": {
-      "0.12.x": {
+      "^5.3.0": {
         "devDependencies": {
-          "zombie": "^3.1.1"
+          "zombie": "^4.1.0"
         }
       }
     }
