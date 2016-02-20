@@ -1,1 +1,5 @@
-module.exports = function(){ return 'bar'; };
+var dep = require("dep");
+
+module.exports = function(){
+	return 'i am other and i have ' + dep();
+};

@@ -3,6 +3,10 @@
 
 # steal-almond
 
+[![Build Status](https://travis-ci.org/stealjs/steal-almond.svg?branch=master)](https://travis-ci.org/stealjs/steal-almond)
+[![npm version](https://badge.fury.io/js/steal-almond.svg)](http://badge.fury.io/js/steal-almond)
+
+
 Create builds of your StealJS that use packs [almond](https://github.com/jrburke/almond) so that Steal is not needed in production.
 
 ## Install
@@ -29,23 +33,19 @@ multiBuild({
 steal-almond builds on the steal-tools streaming APIs. If you are using these you can use steal-almond too:
 
 ```js
+var s = require("steal-tools").streams;
 var stealTools = require("steal-tools");
 var assert = require("assert");
 
-var createGraphStream = stealTools.createGraphStream;
-var multiBuild = stealTools.createMultiBuildStream;
-var concat = stealTools.createConcatStream;
-var write = stealTools.createWriteStream;
+var almond = require("steal-almond").createStream;
 
-var almond = require("steal-almond").createAlmondStream;
-
-var stream = createGraphStream({
+var stream = s.graph({
 	config: __dirname + "/tests/basics/package.json!npm"
 }, { minify: false, quiet: true })
-.pipe(multiBuild())
+.pipe(s.transpileAndBundle())
 .pipe(almond())
-.pipe(concat())
-.pipe(write());
+.pipe(s.concat())
+.pipe(s.write());
 ```
 
 ## License
