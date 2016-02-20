@@ -19,27 +19,15 @@ function addAlmond(data, enc, next){
 	var main = data.steal.System.main;
 
 	var toKeep = walk(data.graph, main);
-
 	var bundle = bundles[0];
 
 	// Should find a more efficient way
 
-	var toRemove = [];
 	bundle.nodes.forEach(function(node, i){
-		if(!toKeep[node.load.name]) toRemove.push(i);
+		node.load.excludeFromBuild = !toKeep[node.load.name];
 	});
 
-	var offset = 0;
-	toRemove.sort();
-	toRemove.forEach(function(i){
-		i = i - offset;
-		bundle.nodes.splice(i, 1);
-		offset++;
-	});
-
-	var hasGlobal = bundle.nodes.some(function(node){
-		return node.load.metadata.format === "global";
-	});
+	var hasGlobal = bundle.nodes.some(isGlobal);
 
 	var globalPromise = Promise.resolve();
 	if(hasGlobal){
@@ -82,10 +70,8 @@ function walk(graph, name, keep, visited){
 	return keep;
 }
 
-function merge(obj, arr){
-	arr.forEach(function(key){
-		obj[key] = true;
-	});
+function isGlobal(node){
+	return node.load.metadata && node.load.metadata.format === "global";
 }
 
 function createBuild(stealTools){
