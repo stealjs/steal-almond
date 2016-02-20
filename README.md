@@ -3,6 +3,10 @@
 
 # steal-almond
 
+[![Build Status](https://travis-ci.org/stealjs/steal-almond.svg?branch=master)](https://travis-ci.org/stealjs/steal-almond)
+[![npm version](https://badge.fury.io/js/steal-almond.svg)](http://badge.fury.io/js/steal-almond)
+
+
 Create builds of your StealJS that use packs [almond](https://github.com/jrburke/almond) so that Steal is not needed in production.
 
 ## Install
