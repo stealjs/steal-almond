@@ -34,9 +34,6 @@ steal-almond builds on the steal-tools streaming APIs. If you are using these yo
 
 ```js
 var s = require("steal-tools").streams;
-var stealTools = require("steal-tools");
-var assert = require("assert");
-
 var almond = require("steal-almond").createStream;
 
 var stream = s.graph({
