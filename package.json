@@ -33,5 +33,13 @@
         }
       }
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stealjs/steal-almond.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stealjs/steal-almond/issues"
+  },
+  "homepage": "https://github.com/stealjs/steal-almond#readme"
 }
