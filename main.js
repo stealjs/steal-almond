@@ -2,47 +2,66 @@ var through = require("through2");
 var almondPath = require.resolve("almond");
 var makeNode = require("steal-tools/lib/node/make_node");
 var fs = require("fs");
+var asap = require("pdenodeify");
 
 exports = module.exports = createBuild;
 
-exports.createAlmondStream = function(){
+exports.createStream = function(){
 	return through.obj(addAlmond);
 };
 
 function addAlmond(data, enc, next){
 	var bundles = data.bundles;
+
+	// TODO check if there are more than 1 bundle and throw
+
 	var configMain = data.steal.System.configMain;
 	var main = data.steal.System.main;
 
 	var toKeep = walk(data.graph, main);
 
-	bundles.forEach(function(bundle){
-		// Should find a more efficient way
+	var bundle = bundles[0];
 
-		var toRemove = [];
-		bundle.nodes.forEach(function(node, i){
-			if(!toKeep[node.load.name]) toRemove.push(i);
-		});
+	// Should find a more efficient way
 
-		var offset = 0;
-		toRemove.sort();
-		toRemove.forEach(function(i){
-			i = i - offset;
-			bundle.nodes.splice(i, 1);
-			offset++;
-		});
+	var toRemove = [];
+	bundle.nodes.forEach(function(node, i){
+		if(!toKeep[node.load.name]) toRemove.push(i);
 	});
 
-	fs.readFile(almondPath, "utf8", function(err, src){
-		if(err) return next(err);
+	var offset = 0;
+	toRemove.sort();
+	toRemove.forEach(function(i){
+		i = i - offset;
+		bundle.nodes.splice(i, 1);
+		offset++;
+	});
 
-		var bundle = bundles[0];
+	var hasGlobal = bundle.nodes.some(function(node){
+		return node.load.metadata.format === "global";
+	});
+
+	var globalPromise = Promise.resolve();
+	if(hasGlobal){
+		globalPromise = asap(fs.readFile)(__dirname+"/loader_shim.js", "utf8")
+			.then(function(src){
+				bundle.nodes.unshift(makeNode("[@loader]", src));
+			});
+	}
+
+	globalPromise.then(function(){
+		return asap(fs.readFile)(almondPath, "utf8");
+	})
+	.then(function(src){
 		bundle.nodes.unshift(makeNode("[almond]", src));
-		bundle.nodes.push(makeNode("[require]", "require([\"" + main + "\"]);\n"));
+		bundle.nodes.push(makeNode("[require-main]", "require([\"" + main +
+								   "\"]);\n"));
 		bundle.nodes.unshift(makeNode("[iife-start]", "(function(){\n"));
 		bundle.nodes.push(makeNode("[iife-end]", "\n})();\n"));
 
 		next(null, data);
+	}, function(err){
+		next(err);
 	});
 }
 
@@ -70,22 +89,24 @@ function merge(obj, arr){
 }
 
 function createBuild(stealTools){
-	var createGraphStream = stealTools.createGraphStream;
-	var multiBuild = stealTools.createMultiBuildStream;
-	var concat = stealTools.createConcatStream;
-	var write = stealTools.createWriteStream;
-	var almond = exports.createAlmondStream;
+	var s = stealTools.streams;
+	var almond = exports.createStream;
 
 	return function(system, options){
 		return new Promise(function(resolve, reject){
 			options = options || {};
 			options.useNormalizedDependencies = true;
 
-			var stream = createGraphStream(system, options)
-			.pipe(multiBuild())
+			var stream = s.graph(system, options)
+			.pipe(s.transpileAndBundle())
 			.pipe(almond())
-			.pipe(concat())
-			.pipe(write());
+			.pipe(s.concat());
+
+			if(options.minify !== false) {
+				stream = stream.pipe(minify(options));
+			}
+
+			stream = stream.pipe(s.write());
 
 			stream.on("data", function(data){
 				this.end();
@@ -98,4 +119,44 @@ function createBuild(stealTools){
 
 		});
 	};
+}
+
+// TODO this should be a separate package
+function minify(options){
+	var UglifyJS = require("uglify-js");
+
+	//var result = UglifyJS.minify(code, opts)
+
+	return through.obj(function(data, enc, next){
+		var bundle = data.bundles[0];
+		var source = bundle.source;
+
+		var opts = { fromString: true };
+		if(source.map) {
+			var inMap = source.map.toJSON();
+			var file = inMap.sources && inMap.sources[0];
+			opts.inSourceMap = inMap;
+			opts.outSourceMap = file;
+
+			if(options.sourceMapsContent) {
+				opts.sourceMapIncludeSources = true;
+			}
+		}
+
+		try {
+			var result = UglifyJS.minify(source.code, opts);
+			result.code = removeSourceMapUrl(result.code);
+
+			bundle.source = result;
+			next(null, data);
+		} catch(err) {
+			next(err);
+		}
+
+	});
+}
+
+function removeSourceMapUrl(source){
+	var expression = /\n\/\/# sourceMappingURL=(.)+$/;
+	return (source || "").replace(expression, "");
 }

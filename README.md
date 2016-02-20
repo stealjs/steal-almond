@@ -29,23 +29,19 @@ multiBuild({
 steal-almond builds on the steal-tools streaming APIs. If you are using these you can use steal-almond too:
 
 ```js
+var s = require("steal-tools").streams;
 var stealTools = require("steal-tools");
 var assert = require("assert");
 
-var createGraphStream = stealTools.createGraphStream;
-var multiBuild = stealTools.createMultiBuildStream;
-var concat = stealTools.createConcatStream;
-var write = stealTools.createWriteStream;
+var almond = require("steal-almond").createStream;
 
-var almond = require("steal-almond").createAlmondStream;
-
-var stream = createGraphStream({
+var stream = s.graph({
 	config: __dirname + "/tests/basics/package.json!npm"
 }, { minify: false, quiet: true })
-.pipe(multiBuild())
+.pipe(s.transpileAndBundle())
 .pipe(almond())
-.pipe(concat())
-.pipe(write());
+.pipe(s.concat())
+.pipe(s.write());
 ```
 
 ## License
