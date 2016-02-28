@@ -84,7 +84,9 @@ function createBuild(stealTools){
 			options.useNormalizedDependencies = true;
 
 			var stream = s.graph(system, options)
-			.pipe(s.transpileAndBundle())
+			.pipe(s.transpile())
+			.pipe(s.minify())
+			.pipe(s.bundle())
 			.pipe(almond())
 			.pipe(s.concat());
 

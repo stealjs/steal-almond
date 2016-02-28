@@ -79,7 +79,9 @@ describe("createStream", function(){
 			quiet: true,
 			useNormalizedDependencies: true
 		})
-		.pipe(s.transpileAndBundle())
+		.pipe(s.transpile())
+		.pipe(s.minify())
+		.pipe(s.bundle())
 		.pipe(almond())
 		.pipe(s.concat())
 		.pipe(s.write());
