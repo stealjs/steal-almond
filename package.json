@@ -1,6 +1,6 @@
 {
   "name": "steal-almond",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bundle your Steal app with Almond",
   "main": "main.js",
   "scripts": {
