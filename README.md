@@ -39,7 +39,9 @@ var almond = require("steal-almond").createStream;
 var stream = s.graph({
 	config: __dirname + "/tests/basics/package.json!npm"
 }, { minify: false, quiet: true })
-.pipe(s.transpileAndBundle())
+.pipe(s.transpile())
+.pipe(s.minify())
+.pipe(s.bundle())
 .pipe(almond())
 .pipe(s.concat())
 .pipe(s.write());
