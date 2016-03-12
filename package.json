@@ -17,7 +17,7 @@
     "engine-dependencies": "^0.2.11",
     "mocha": "^2.4.5",
     "rimraf": "^2.5.2",
-    "steal-tools": "git://github.com/stealjs/steal-tools#streams",
+    "steal-tools": "^0.15.0",
     "through2": "^2.0.1"
   },
   "dependencies": {
