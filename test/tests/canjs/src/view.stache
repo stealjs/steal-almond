@@ -1,0 +1,5 @@
+<main>
+	{{#if show}}
+		<div id="hello">Hello world</div>
+	{{/if}}
+</main>

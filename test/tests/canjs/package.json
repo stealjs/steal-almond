@@ -1,0 +1,14 @@
+{
+	"name": "can-app",
+	"main": "main",
+	"version": "0.1.0",
+	"dependencies": {
+		"can": "^2.3.0",
+		"jquery": "^2.2.0"
+	},
+	"system": {
+		"directories": {
+			"lib": "src"
+		}
+	}
+}

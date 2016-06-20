@@ -65,6 +65,26 @@ describe("steal-almond", function(){
 		});
 	});
 
+	it.only("Works with a can app", function(done){
+		var p = stealAlmond({
+			config: __dirname + "/tests/canjs/package.json!npm"
+		}, {
+			minify: false,
+			quiet: true
+		});
+
+		p.then(function(){
+			open("test/tests/canjs/prod.html", function(browser, close){
+				find(browser,"moduleValue", function(moduleValue){
+					var msg = moduleValue.other();
+					var glbl = moduleValue.global;
+					assert.equal(msg, "i am other and i have dep", "it worked");
+					assert.equal(glbl, "global", "got a global");
+					close();
+				}, close);
+			}, done);
+		});
+	});
 });
 
 describe("createStream", function(){
