@@ -13,9 +13,9 @@
   "author": "Bitovi",
   "license": "MIT",
   "devDependencies": {
-    "connect": "^2.14.4",
+    "connect": "^3.5.0",
     "engine-dependencies": "^0.2.11",
-    "mocha": "^2.4.5",
+    "mocha": "^3.2.0",
     "rimraf": "^2.5.2",
     "steal-tools": "^0.16.0",
     "through2": "^2.0.1"
